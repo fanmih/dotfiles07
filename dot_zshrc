@@ -1,4 +1,7 @@
 #####################
+# Based on zshrc from:
+# https://github.com/crivotz/dot_files.git
+#####################
 # FIRST PROMPT LINE #
 #####################
 rosso='\e[1;34m'
