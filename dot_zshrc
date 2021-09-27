@@ -1,9 +1,9 @@
 #####################
 # FIRST PROMPT LINE #
 #####################
-# rosso='\e[1;34m'
-# NC='\e[0m'
-# echo -e "${rosso}Debian${NC}" `cat /etc/debian_version` "| ${rosso}ZSH${NC} ${ZSH_VERSION}"
+rosso='\e[1;34m'
+NC='\e[0m'
+echo -e "${rosso}System${NC}" `uname -sm` "| ${rosso}ZSH${NC} ${ZSH_VERSION}"
 #####################
 # ZINIT             #
 #####################
