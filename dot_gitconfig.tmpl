@@ -18,3 +18,7 @@
 	defaultBranch = master
 ;[url "git@github.com:"]
 ;  insteadOf = https://github.com/
+[alias]
+  dd = diff --check --dirstat --find-copies --find-renames --histogram --color
+  ll = log --graph --topo-order --abbrev-commit --date=short --decorate --all --boundary --pretty=format:'%Cgreen%ad %Cred%h%Creset -%C(yellow)%d%Creset %s %Cblue[%cn]%Creset %Cblue%G?%Creset'
+  dl = log --graph --abbrev-commit --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
