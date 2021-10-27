@@ -134,3 +134,8 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+# Added for cargo
+. "$HOME/.cargo/env"
+
+# Added for broot
+source /Users/zz/.config/broot/launcher/bash/br
