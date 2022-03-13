@@ -348,4 +348,5 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 # Added for broot
-source /Users/zz/.config/broot/launcher/bash/br
+# source /Users/zz/.config/broot/launcher/bash/br
+source $HOME/.config/broot/launcher/bash/br

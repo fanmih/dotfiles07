@@ -138,4 +138,4 @@ unset __conda_setup
 . "$HOME/.cargo/env"
 
 # Added for broot
-source /Users/zz/.config/broot/launcher/bash/br
+source $HOME/.config/broot/launcher/bash/br
