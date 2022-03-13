@@ -227,6 +227,15 @@ autoload colors && colors
 # ALIASES           #
 #####################
 # source $HOME/.zsh_aliases
+alias ll='ls -hlqAF'
+alias lt='exa --tree --color=always --icons --all --git --level=2'
+
+[ -e /etc/arch-release ] && alias -g paks='sudo pacman -S'
+
+alias paux='ps aux | bat --language man'
+alias pauz='ps aux | fzf'
+
+alias archive='tar --create --gzip --verbose --file'
 
 #####################
 # FANCY-CTRL-Z      #
@@ -303,6 +312,8 @@ bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
 bindkey '^P' history-substring-search-up
 bindkey '^N' history-substring-search-down
+bindkey '^K' kill-line
+
 
 # Do not set the TERM variable in she shell! Set it to iTerm2 manually.
 # If you do set it in the shell the Tmux will read this and mess up the colors!

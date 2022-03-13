@@ -1,2 +1,6 @@
+#!/usr/bin/env zsh
+
 . "$HOME/.cargo/env"
 export PATH="$HOME/.local/bin:$HOME/.emacs.d/bin:$PATH"
+
+export XDG_CONFIG_HOME="$HOME/.config"
