@@ -4,3 +4,7 @@
 export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.emacs.d/bin:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
+
+
+# Tmux-fzf options
+export TMUX_FZF_OPTIONS="-p -w 90% -h 70% -m"
