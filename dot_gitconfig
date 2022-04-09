@@ -1,7 +1,7 @@
 [user]
-    email = Michael Fanariotis 
-    name = fanmih@gmail.com 
-	signingkey = B0B1C15BFBE06901
+	email = fanmih@gmail.com
+	name = Michael Fanariotis
+	signingkey = CA62A30F18B6FC8009020E43B0B1C15BFBE06901
 [core]
   editor = lvim
 ;[difftool "sourcetree"]
@@ -11,7 +11,7 @@
 ;	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 ;	trustExitCode = true
 [commit]
-    gpgSign = true
+	gpgsign = true
 [github]
 	user = fanmih
 [init]
