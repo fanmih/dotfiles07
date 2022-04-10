@@ -165,8 +165,8 @@ zinit light charmbracelet/glow
 zinit ice lucid wait"0" as"program" from"gh-r" bpick='*amd64.deb' pick"usr/bin/code-minimap"
 zinit light wfxr/code-minimap
 # ZSH DIFF SO FANCY
-# zinit ice wait"2" lucid as"program" pick"bin/git-dsf"
-# zinit light zdharma-continuum/zsh-diff-so-fancy
+zinit ice wait"2" lucid as"program" pick"bin/git-dsf"
+zinit light zdharma-continuum/zsh-diff-so-fancy
 # GIT-FLOW
 # zinit light petervanderdoes/git-flow-completion
 # RCLONE
