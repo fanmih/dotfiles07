@@ -139,3 +139,4 @@ unset __conda_setup
 
 # Added for broot
 source $HOME/.config/broot/launcher/bash/br
+

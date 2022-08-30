@@ -1,3 +1,7 @@
 [data]
         email = "fanmih@gmail.com"
         name = "Michael Fanariotis"
+[diff]
+        command = "difft"
+        args = ["{{ .Destination }}", "{{ .Target }}"]
+        pager = "diff-so-fancy"
