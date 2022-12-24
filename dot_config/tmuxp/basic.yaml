@@ -1,0 +1,24 @@
+session_name: my-session
+windows:
+  - window_name: my-window-1
+    layout: custom
+    panes:
+      - shell_command: ["echo 'Pane 1'"]
+        pane_width: 200
+        pane_height: 400
+        pane_x: 0
+        pane_y: 0
+      - shell_command: ["echo 'Pane 2'"]
+        pane_width: 200
+        pane_height: 400
+        pane_x: 200
+        pane_y: 0
+      - shell_command: ["echo 'Pane 3'"]
+        pane_width: 200
+        pane_height: 400
+        pane_x: 400
+        pane_y: 0
+  - window_name: my-window-2
+    panes:
+      - shell_command: ["echo 'Pane 4'"]
+
