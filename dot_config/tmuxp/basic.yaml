@@ -1,7 +1,7 @@
 session_name: my-session
 windows:
   - window_name: my-window-1
-    layout: custom
+    # layout: custom
     panes:
       - shell_command: ["echo 'Pane 1'"]
         pane_width: 200
