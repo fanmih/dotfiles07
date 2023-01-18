@@ -324,6 +324,7 @@ bindkey '^F' delete-char
 bindkey '^B' vi-backward-word
 bindkey '^N' vi-forward-word
 bindkey '^O' delete-word
+bindkey '^Y' yank
 
 
 # Do not set the TERM variable in she shell! Set it to iTerm2 manually.
