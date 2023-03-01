@@ -1,3 +1,13 @@
+continuation_prompt = '▶▶ '
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+[character] # The name of the module we are configuring is 'character'
+# success_symbol = '[➜ ](bold green)' # The 'success_symbol' segment is being set to '➜' with the color 'bold green'
+success_symbol = '[þ](bold green)' # The 'success_symbol' segment is being set to '➜' with the color 'bold green'
+
+
 [aws]
 format = '\[[$symbol($profile)(\($region\))(\[$duration\])]($style)\]'
 

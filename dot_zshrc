@@ -244,6 +244,10 @@ alias pauz='ps aux | fzf'
 
 alias archive='tar --create --gzip --verbose --file'
 
+alias mv="mv -v"
+alias cp="cp -v"
+alias rm="rm -v"
+
 #####################
 # FANCY-CTRL-Z      #
 #####################
@@ -336,10 +340,10 @@ bindkey '^Y' yank
 # export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
 
 # Load pyenv automatically by appending
-eval "$(pyenv init -)"
+# eval "$(pyenv init -)"
 
 # Load pyenv-virtualenv automatically
-if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
+# if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
 
 # For Zathura installation: Dbus
 export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_LAUNCHD_SESSION_BUS_SOCKET"
@@ -362,3 +366,5 @@ unset __conda_setup
 # Added for broot
 source $HOME/.config/broot/launcher/bash/br
 
+# Added for asdf
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
