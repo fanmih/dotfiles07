@@ -1,0 +1,66 @@
+# Set the preview options
+set preview true
+set prelow 33%
+set preratio 33:10
+set cmdheight 1
+set scrolloff 1
+
+# Sort by date so latest is on top including hidden ones
+set hidden
+set sortby mtime
+set sortdir desc
+set ignorecase true
+set icons true
+
+# Define the shell to be used
+set shell zsh
+
+# Set the file opener
+cmd open !{{
+    case $(file --mime-type "$f" -bL) in
+        # text/*) $EDITOR "$f" ;;
+        text/*) bat "$f" ;;
+        image/*) sxiv "$f" ;;
+        # video/*) mpv "$f" ;;
+        video/*) iina "$f" ;;
+        # *) xdg-open "$f" ;;
+        *) open "$f" ;;
+    esac
+}}
+
+# Keybindings
+map o open
+map e !{ $EDITOR "$fx" }
+# map <c-e> !{ fd }
+map i !{ sxiv "$fx" }
+# map m !{ mpv "$fx" }
+map m !{ iina "$fx" }
+map x !{ xdg-open "$fx" }
+map <up> up 1
+map <down> down 1
+map <left> back
+map <right> open
+map <c-l> redraw
+map <c-u> half-up
+map <c-d> half-down
+map <c-b> page-up
+map <c-f> page-down
+map <c-r> reload
+map <c-w> toggle
+map <c-x> quit
+map <c-h> !{ lf -last-dir-path="$fx" -command 'toggle hidden' }
+
+# Set bookmarks
+cmd mark1 !{ lf -remote "send load '$HOME/Downloads'" }
+cmd mark2 !{ lf -remote "send load '$HOME/Documents'" }
+
+# Set keybindings for bookmarks
+map 1 mark1
+map 2 mark2
+
+
+# Movement
+map gD cd ~/documents
+map gd cd ~/downloads
+map gp cd ~/pictures
+map gc cd ~/.config

@@ -39,6 +39,17 @@ autoload -Uz _zinit
 eval "$(starship init zsh)"
 
 #####################
+## Brew completions #
+#####################
+if type brew &>/dev/null
+then
+    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+
+      autoload -Uz compinit
+        compinit
+fi
+
+#####################
 # PLUGINS           #
 #####################
 # SSH-AGENT
@@ -96,8 +107,8 @@ export NVM_AUTO_USE=true
 zinit ice wait="1" lucid
 zinit light lukechilds/zsh-nvm
 # EXA
-zinit ice wait="2" lucid from"gh-r" as"program" mv"bin/exa* -> exa"
-zinit light ogham/exa
+zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/exa* -> exa"
+zinit light eza-community/eza
 zinit ice wait blockf atpull'zinit creinstall -q .'
 # DELTA
 zinit ice lucid wait="0" as"program" from"gh-r" pick"delta*/delta"
@@ -157,8 +168,8 @@ zinit light "cli/cli"
 # ZSH MANYDOTS MAGIC
 zinit autoload'#manydots-magic' for knu/zsh-manydots-magic
 # TREE-SITTER
-zinit ice as"program" from"gh-r" mv"tree* -> tree-sitter" pick"tree-sitter"
-zinit light tree-sitter/tree-sitter
+# zinit ice as"program" from"gh-r" mv"tree* -> tree-sitter" pick"tree-sitter"
+# zinit light tree-sitter/tree-sitter
 # XURLS
 zinit ice as"program" from"gh-r" mv"xurls* -> xurls" pick"xurls"
 zinit light mvdan/xurls
@@ -212,7 +223,19 @@ setopt automenu
 unsetopt BEEP
 setopt vi
 
-chpwd() exa --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
+# chpwd() exa --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
+
+chpwd() {
+  set -- "$(git rev-parse --show-toplevel 2> /dev/null)"
+  # If cd'ing into a git working copy and not within the same working copy
+  if [ -n "$1" ] && [ "$1" != "$vc_root" ]; then
+    vc_root="$1"
+    git fetch
+  fi
+  # ls inside folder after cd
+  exa --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
+}
+
 #####################
 # ENV VARIABLE      #
 #####################
@@ -274,6 +297,10 @@ export FZF_DEFAULT_OPTS="
 --ansi
 --layout=default
 --info=inline
+--color=fg:#c0caf5,bg:#24283b,hl:#ff9e64
+--color=fg+:#c0caf5,bg+:#24283b,hl+:#ff9e64
+--color=info:#7aa2f7,prompt:#7aa2f7,pointer:#db4b4b
+--color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
 --height=50%
 --multi
 --preview-window=right:50%
@@ -287,6 +314,14 @@ export FZF_DEFAULT_OPTS="
 --bind 'ctrl-v:execute(code {+})'"
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS='--preview="cat {}" --preview-window=right:60%:wrap'
+export FZF_ALT_C_OPTS='--preview="ls {}" --preview-window=right:60%:wrap'
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+--height=50%
+--color=fg:#e5e9f0,bg:#2e3440,hl:#81a1c1
+--color=fg+:#e5e9f0,bg+:#2e3440,hl+:#81a1c1
+--color=info:#eacb8a,prompt:#bf6069,pointer:#b48dac
+--color=marker:#a3be8b,spinner:#b48dac,header:#a3be8b'
 
 #####################
 # FZF-GC-PROJECT    #
@@ -348,9 +383,10 @@ bindkey '^Y' yank
 # For Zathura installation: Dbus
 export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_LAUNCHD_SESSION_BUS_SOCKET"
 
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/homebrew/Caskroom/mambaforge/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+__conda_setup="$('/opt/homebrew/Caskroom/mambaforge/base/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
@@ -361,10 +397,27 @@ else
     fi
 fi
 unset __conda_setup
+
+if [ -f "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/mamba.sh" ]; then
+    . "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/mamba.sh"
+fi
 # <<< conda initialize <<<
+
 
 # Added for broot
 source $HOME/.config/broot/launcher/bash/br
 
 # Added for asdf
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
+
+
+function conda_activate() {
+    local original_path="$PATH"
+    export PATH=$(echo "$PATH" | sed 's|:$HOME/.asdf/shims||' | sed 's|$HOME/.asdf/shims:||')
+    export PATH="/opt/homebrew/Caskroom/mambaforge/base/bin:$PATH"
+    conda activate "$1"
+    if [ $? -ne 0 ]; then
+        echo "Failed to activate conda environment. Restoring original PATH."
+        export PATH="$original_path"
+    fi
+}
