@@ -28,6 +28,17 @@ cmd open !{{
     esac
 }}
 
+# Add zoxide support
+cmd z %{{
+	result="$(zoxide query --exclude $PWD $@ | sed 's/\\/\\\\/g;s/"/\\"/g')"
+	lf -remote "send $id cd \"$result\""
+}}
+
+cmd zi ${{
+	result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
+	lf -remote "send $id cd \"$result\""
+}}
+
 # Keybindings
 map o open
 map e !{ $EDITOR "$fx" }
