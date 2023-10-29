@@ -91,7 +91,7 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zinit ice from"gh-r" as"command"
 zinit light junegunn/fzf
 # FZF BYNARY AND TMUX HELPER SCRIPT
-zinit ice lucid wait='0c' as"command" id-as"junegunn/fzf-tmux" pick"bin/fzf-tmux"
+zinit ice lucid wait'0c' as="command" id-as="junegunn/fzf-tmux" pick="bin/fzf-tmux"
 zinit light junegunn/fzf
 # BIND MULTIPLE WIDGETS USING FZF
 zinit ice lucid wait='0c' multisrc"shell/{completion,key-bindings}.zsh" id-as"junegunn/fzf_completions" pick"/dev/null"
@@ -114,13 +114,16 @@ zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza"
 zinit light eza-community/eza
 zinit ice wait blockf atpull'zinit creinstall -q .'
 # DELTA
-zinit ice lucid wait="0" as"program" from"gh-r" pick"delta*/delta"
+zinit ice lucid wait="0" as="program" from="gh-r" pick="delta*/delta"
 zinit light 'dandavison/delta'
 # DUST
-zinit ice wait="2" lucid from"gh-r" as"program" mv"dust*/dust -> dust" pick"dust" atload"alias du=dust"
+zinit ice wait="2" lucid from="gh-r" as="program" atload="alias du=dust"
 zinit light bootandy/dust
+# BOTTOM
+zinit ice wait="2" lucid from="gh-r" as="program"
+zinit light ClementTsang/bottom
 # DUF
-zinit ice lucid wait="0" as"program" from"gh-r" bpick='*linux_amd64.deb' pick"usr/bin/duf" atload"alias df=duf"
+zinit ice lucid wait="0" as="program" from="gh-r" atload="alias df=duf"
 zinit light muesli/duf
 # BAT
 zinit ice from"gh-r" as"program" mv"bat* -> bat" pick"bat/bat" atload"alias cat=bat"
@@ -135,67 +138,62 @@ alias man=batman.sh
 # RIPGREP
 zinit ice from"gh-r" as"program" mv"ripgrep* -> ripgrep" pick"ripgrep/rg"
 zinit light BurntSushi/ripgrep
-
 # NEOVIM
 # zinit ice from"gh-r" as"program" bpick"*appimage*" ver"nightly" mv"nvim* -> nvim" pick"nvim"
 # zinit light neovim/neovim
-
+# WEZTERM
+# zinit ice from="gh-r" as="program" bpick="*ebian11.deb" ver="nightly" pick="usr/bin/wezterm"
+# zinit ice from="gh-r" as="program" bpick="*appimage*" mv="Wez* -> wezterm" pick="wezterm"
+# zinit light wez/wezterm
 # FORGIT
 zinit ice wait lucid
 zinit load 'wfxr/forgit'
 # LAZYGIT
-zinit ice lucid wait="0" as"program" from"gh-r" mv"lazygit* -> lazygit" atload"alias lg='lazygit'"
-zinit light 'jesseduffield/lazygit'
+zinit ice lucid wait="0" as="program" from="gh-r" mv="lazygit* -> lazygit" atload="alias lg='lazygit'"
+zinit light jesseduffield/lazygit
 # LAZYDOCKER
-zinit ice lucid wait="0" as"program" from"gh-r" mv"lazydocker* -> lazydocker" atload"alias lg='lazydocker'"
-zinit light 'jesseduffield/lazydocker'
+zinit ice lucid wait="0" as="program" from="gh-r" mv="lazydocker* -> lazydocker" atload="alias ld='lazydocker'"
+zinit light jesseduffield/lazydocker
 # RANGER
-zinit ice depth'1' as"program" pick"ranger.py"
+zinit ice depth="1" as="program" pick="ranger.py"
 zinit light ranger/ranger
 # FD
-zinit ice as"command" from"gh-r" mv"fd* -> fd" pick"fd/fd"
+zinit ice as="command" from="gh-r" mv="fd* -> fd" pick="fd/fd"
 zinit light sharkdp/fd
 # GH-CLI
-zinit ice lucid wait="0" as"program" from"gh-r" pick"usr/bin/gh"
-zinit light "cli/cli"
+zinit ice lucid wait="0" as="program" from="gh-r" pick="gh*/bin/gh"
+zinit light cli/cli
 # GOOGLE-CLOUD-SDK COMPLETION
-# zinit ice as"completion"; zinit snippet /opt/google-cloud-sdk/completion.zsh.inc
+# zinit ice as="completion"; zinit snippet /opt/google-cloud-sdk/completion.zsh.inc
 # TMUX
 # zinit ice from"gh-r" as"program" mv"tmux* -> tmux" pick"tmux" atload"alias tmux=tmux"
 # zinit light tmux/tmux
 # TMUXINATOR
-# zinit ice as"completion"; zinit snippet ~/.nubem_dot_files/extras/tmuxinator/tmuxinator.zsh
-# ZELLIJ https://github.com/zellij-org/zellij
-# zinit ice lucid wait="0" as="program" from="gh-r"
-# zinit light zellij-org/zellij
+# zinit ice as="completion"; zinit snippet ~/.tmuxinator.zsh
 # ZSH MANYDOTS MAGIC
-zinit autoload'#manydots-magic' for knu/zsh-manydots-magic
+zinit ice depth"1" wait lucid pick"manydots-magic" compile"manydots-magic"
+zinit light knu/zsh-manydots-magic
 # TREE-SITTER
-# zinit ice as"program" from"gh-r" mv"tree* -> tree-sitter" pick"tree-sitter"
+# zinit ice as="program" from="gh-r" mv="tree* -> tree-sitter" pick="tree-sitter"
 # zinit light tree-sitter/tree-sitter
 # XURLS
-zinit ice as"program" from"gh-r" mv"xurls* -> xurls" pick"xurls"
+zinit ice as="program" from="gh-r" mv="xurls* -> xurls" pick="xurls"
 zinit light mvdan/xurls
 # PRETTYPING
-zinit ice lucid wait='' as"program" pick"prettyping" atload'alias ping=prettyping'
-zinit load "denilsonsa/prettyping"
+zinit ice lucid wait="" as="program" pick="prettyping" atload="alias ping=prettyping"
+zinit load denilsonsa/prettyping
+# CROC
+zinit ice lucid wait="0" as="program" from="gh-r" bpick="*64bit*"
+zinit light schollz/croc
 # GLOW
-zinit ice lucid wait="0" as"program" from"gh-r" bpick='*linux_amd64.deb' pick"usr/bin/glow"
-zinit light charmbracelet/glow
-# CODE-MINIMAP
-# zinit ice lucid wait"0" as"program" from"gh-r" bpick='*amd64.deb' pick"usr/bin/code-minimap"
-# zinit light wfxr/code-minimap
+# zinit ice lucid wait"0" as"program" from"gh-r" bpick='*_amd64.deb' pick"usr/bin/glow"
+# zinit light charmbracelet/glow
+# ERDTREE
+zinit ice lucid wait"0" as"program" from"gh-r"
+zinit light solidiquis/erdtree
 # ZSH DIFF SO FANCY
 zinit ice wait="2" lucid as"program" pick"bin/git-dsf"
 zinit light zdharma-continuum/zsh-diff-so-fancy
-# GIT-FLOW
-# zinit light petervanderdoes/git-flow-completion
-# RCLONE
-# zinit ice lucid wait"0" as"program" from"gh-r" bpick='*-linux-amd64.deb' pick"usr/bin/rclone"
-# zinit light 'rclone/rclone'
-# WHATSAPP CLI
-# zinit ice lucid wait"0" as"program" from"gh-r" pick"whatscli"
-# zinit light "normen/whatscli"
 #####################
 # HISTORY           #
 #####################
