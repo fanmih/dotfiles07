@@ -62,6 +62,9 @@ zinit light zsh-users/zsh-autosuggestions
 zinit ice wait="0b" lucid
 zinit light b4b4r07/enhancd
 export ENHANCD_FILTER=fzf:fzy:peco
+# ZOXIDE
+zinit ice wait="0" lucid from="gh-r" as="program" pick="zoxide-*/zoxide -> zoxide" cp="zoxide-*/completions/_zoxide -> _zoxide" atclone="./zoxide init zsh > init.zsh" atpull="%atclone" src="init.zsh"
+zinit light ajeetdsouza/zoxide
 # HISTORY SUBSTRING SEARCHING
 zinit ice wait="0b" lucid atload'bindkey "$terminfo[kcuu1]" history-substring-search-up; bindkey "$terminfo[kcud1]" history-substring-search-down'
 zinit light zsh-users/zsh-history-substring-search
@@ -106,8 +109,8 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 export NVM_AUTO_USE=true
 zinit ice wait="1" lucid
 zinit light lukechilds/zsh-nvm
-# EXA
-zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/exa* -> exa"
+# EZA
+zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza"
 zinit light eza-community/eza
 zinit ice wait blockf atpull'zinit creinstall -q .'
 # DELTA
@@ -223,7 +226,7 @@ setopt automenu
 unsetopt BEEP
 setopt vi
 
-# chpwd() exa --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
+# chpwd() eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
 
 chpwd() {
   set -- "$(git rev-parse --show-toplevel 2> /dev/null)"
@@ -233,7 +236,7 @@ chpwd() {
     git fetch
   fi
   # ls inside folder after cd
-  exa --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
+  eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
 }
 
 #####################
@@ -258,7 +261,7 @@ autoload colors && colors
 #####################
 # source $HOME/.zsh_aliases
 alias ll='ls -hlqAF'
-alias lt='exa --tree --color=always --icons --all --git --level=2'
+alias lt='eza --tree --color=always --icons --all --git --level=2'
 
 [ -e /etc/arch-release ] && alias -g paks='sudo pacman -S'
 

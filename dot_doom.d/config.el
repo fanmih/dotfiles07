@@ -77,3 +77,4 @@
 (setq elfeed-feeds (quote
                     (("https://www.reddit.com/r/linux.rss" reddit linux)
                      ("https://www.reddit.com/r/emacs.rss" reddit linux))))
+(setq initial-frame-alist '((width . 155) (height . 60)))
