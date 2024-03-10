@@ -234,7 +234,7 @@ chpwd() {
     git fetch
   fi
   # ls inside folder after cd
-  eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale all,age,size
+  eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
 }
 
 #####################
