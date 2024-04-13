@@ -246,7 +246,8 @@ export PAGER='less'
 export SHELL='/bin/zsh'
 export LANG='en_US.UTF-8'
 export LC_ALL='en_US.UTF-8'
-export BAT_THEME="gruvbox-dark"
+# The one below i set through the bat config file
+# export BAT_THEME="gruvbox-dark"
 # if [[ ! $(tmux ls) ]] 2> /dev/null; then 
   # tmux new -s λ
 # fi
