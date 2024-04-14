@@ -295,14 +295,18 @@ bindkey '^Z' fancy-ctrl-z
 #####################
 # FZF SETTINGS      #
 #####################
+# Added for Catppuccin theme and commented the rest
+# --color=fg:#c0caf5,bg:#24283b,hl:#ff9e64
+# --color=fg+:#c0caf5,bg+:#24283b,hl+:#ff9e64
+# --color=info:#7aa2f7,prompt:#7aa2f7,pointer:#db4b4b
+# --color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
 export FZF_DEFAULT_OPTS="
 --ansi
 --layout=default
 --info=inline
---color=fg:#c0caf5,bg:#24283b,hl:#ff9e64
---color=fg+:#c0caf5,bg+:#24283b,hl+:#ff9e64
---color=info:#7aa2f7,prompt:#7aa2f7,pointer:#db4b4b
---color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
+--color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
+--color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
+--color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
 --height=50%
 --multi
 --preview-window=right:50%
