@@ -298,7 +298,6 @@ bindkey '^Z' fancy-ctrl-z
 # Added for Catppuccin theme and commented the rest
 # --color=fg:#c0caf5,bg:#24283b,hl:#ff9e64
 # --color=fg+:#c0caf5,bg+:#24283b,hl+:#ff9e64
-# --color=info:#7aa2f7,prompt:#7aa2f7,pointer:#db4b4b
 # --color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
 export FZF_DEFAULT_OPTS="
 --ansi
@@ -306,7 +305,8 @@ export FZF_DEFAULT_OPTS="
 --info=inline
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
 --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc \
---color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+--color=info:#7aa2f7,prompt:#7aa2f7,pointer:#db4b4b \
+--color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8
 --height=50%
 --multi
 --preview-window=right:50%
@@ -318,16 +318,11 @@ export FZF_DEFAULT_OPTS="
 --marker='✓'
 --bind 'ctrl-e:execute(nvim {} < /dev/tty > /dev/tty 2>&1)' > selected
 --bind 'ctrl-v:execute(code {+})'"
+
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS='--preview="cat {}" --preview-window=right:60%:wrap'
 export FZF_ALT_C_OPTS='--preview="ls {}" --preview-window=right:60%:wrap'
-export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
---height=50%
---color=fg:#e5e9f0,bg:#2e3440,hl:#81a1c1
---color=fg+:#e5e9f0,bg+:#2e3440,hl+:#81a1c1
---color=info:#eacb8a,prompt:#bf6069,pointer:#b48dac
---color=marker:#a3be8b,spinner:#b48dac,header:#a3be8b'
 
 #####################
 # FZF-GC-PROJECT    #
