@@ -259,8 +259,9 @@ autoload colors && colors
 # ALIASES           #
 #####################
 # source $HOME/.zsh_aliases
-alias ll='ls -hlqAF'
-alias lt='eza --tree --color=always --icons --all --git --level=2'
+# alias ll='ls -hlqAF'
+alias ll='eza -lha --git --icons --color=always --group-directories-first -S --reverse | bat'
+alias lt='eza --tree --color=always --icons --all --git --level=2 | bat'
 
 [ -e /etc/arch-release ] && alias -g paks='sudo pacman -S'
 
@@ -408,10 +409,6 @@ fi
 # Added for broot
 source $HOME/.config/broot/launcher/bash/br
 
-# Added for asdf
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
-
-
 function conda_activate() {
     local original_path="$PATH"
     export PATH=$(echo "$PATH" | sed 's|:$HOME/.asdf/shims||' | sed 's|$HOME/.asdf/shims:||')
@@ -422,3 +419,6 @@ function conda_activate() {
         export PATH="$original_path"
     fi
 }
+
+# Added for asdf
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
