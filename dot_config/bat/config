@@ -25,8 +25,3 @@
 #   Example 2: Use ".gitignore"-style highlighting for ".ignore" files
 #--map-syntax "*.ino:C++"
 #--map-syntax ".ignore:Git Ignore"
-
-# To show git modifications by default
---style="changes"
-# To show the header
---style="header,grid"

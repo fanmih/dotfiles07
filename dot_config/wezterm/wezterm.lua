@@ -61,8 +61,16 @@ return {
 	leader = leader,
 	keys = {
 		-- Split panes
-		{ key = "h", mods = "LEADER", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-		{ key = "v", mods = "LEADER", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+		{
+			key = "h",
+			mods = "LEADER",
+			action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+		},
+		{
+			key = "v",
+			mods = "LEADER",
+			action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }),
+		},
 
 		-- Navigate between panes
 		{ key = "LeftArrow", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Left") },
@@ -125,12 +133,13 @@ return {
 			mods = "CTRL",
 			action = wezterm.action.OpenLinkAtMouseCursor,
 		},
+		-- Remove or adjust the following binding if it's causing conflicts
 		-- Copy selection to clipboard on left mouse drag
-		{
-			event = { Drag = { streak = 1, button = "Left" } },
-			mods = "NONE",
-			action = wezterm.action.CopyTo("ClipboardAndPrimarySelection"),
-		},
+		-- {
+		--     event = { Drag = { streak = 1, button = "Left" } },
+		--     mods = "NONE",
+		--     action = wezterm.action.CopyTo("ClipboardAndPrimarySelection"),
+		-- },
 		-- Double-click to select word
 		{
 			event = { Up = { streak = 2, button = "Left" } },
@@ -152,12 +161,18 @@ return {
 	},
 
 	--======================
-	-- 7. Default Shell
+	-- 7. Enable Automatic Copy on Selection
+	--======================
+	-- automatically_copy_on_selection = true,
+	-- the above is not a valid command. copy on selection works without it!
+
+	--======================
+	-- 8. Default Shell
 	--======================
 	default_prog = { "/bin/zsh", "-l" }, -- Adjust based on OS if needed
 
 	--======================
-	-- 8. Advanced Settings
+	-- 9. Advanced Settings
 	--======================
 	window_close_confirmation = "NeverPrompt",
 	cursor_blink_rate = 800,
@@ -166,7 +181,7 @@ return {
 	animation_fps = 30,
 
 	--======================
-	-- 9. Other Useful Settings
+	-- 10. Other Useful Settings
 	--======================
 	enable_kitty_graphics = false,
 	enable_tab_bar = true,
@@ -175,7 +190,7 @@ return {
 	-- initial_cwd = "/home/username/projects",
 
 	--======================
-	-- 10. Event Handlers
+	-- 11. Event Handlers
 	--======================
 	wezterm.on("window-config-reloaded", function(window, pane)
 		window:toast_notification("WezTerm", "Configuration reloaded!")
