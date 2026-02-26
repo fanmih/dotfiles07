@@ -4,38 +4,34 @@
 #####################
 # FIRST PROMPT LINE #
 #####################
+# ANSI color helpers for the banner line below.
 rosso='\e[1;34m'
 NC='\e[0m'
+# Print OS + Zsh version on shell start.
 echo -e "${rosso}System${NC}" `uname -sm` "| ${rosso}ZSH${NC} ${ZSH_VERSION}"
 #####################
 # ZINIT             #
 #####################
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.zinit/bin/zinit.zsh ]]; then
+    # First-run bootstrap of Zinit into ~/.zinit.
     print -P "%F{33}▓▒░ %F{220}Installing DHARMA Initiative Plugin Manager (zdharma-continuum/zinit)…%f"
     command mkdir -p $HOME/.zinit
     command git clone https://github.com/zdharma-continuum/zinit $HOME/.zinit/bin && \
         print -P "%F{33}▓▒░ %F{34}Installation successful.%F" || \
         print -P "%F{160}▓▒░ The clone has failed.%F"
 fi
+# Load Zinit plugin manager.
 source "$HOME/.zinit/bin/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
-
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-# zinit light-mode for \
-#     zinit-zsh/z-a-rust \
-#     zinit-zsh/z-a-as-monitor \
-#     zinit-zsh/z-a-patch-dl \
-#     zinit-zsh/z-a-bin-gem-node
 
 ### End of Zinit installer's chunk
 
 #####################
 # THEME             #
 #####################
-# zinit ice depth=1; zinit light romkatv/powerlevel10k
+# Starship prompt initialization (theme engine).
 eval "$(starship init zsh)"
 
 #####################
@@ -43,6 +39,7 @@ eval "$(starship init zsh)"
 #####################
 if type brew &>/dev/null
 then
+    # Enable Homebrew-provided Zsh completions if brew exists.
     FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 
       autoload -Uz compinit
@@ -50,119 +47,283 @@ then
 fi
 
 #####################
-# PLUGINS           #
+# SYSTEM CAPABILITIES #
 #####################
-# SSH-AGENT
-zinit light bobsoppe/zsh-ssh-agent
-# AUTOSUGGESTIONS, TRIGGER PRECMD HOOK UPON LOAD
+# Check system capabilities for conditional loading
+# Simple feature-detection helpers used later in the file.
+is_macos() { [[ "$OSTYPE" == darwin* ]] }
+is_linux() { [[ "$OSTYPE" == linux* ]] }
+has_gui() { [[ -n "$DISPLAY" ]] || [[ "$OSTYPE" == darwin* ]] }
+has_docker() { command -v docker >/dev/null 2>&1 }
+has_git() { command -v git >/dev/null 2>&1 }
+
+#####################
+# PLUGIN HEALTH CHECKS #
+#####################
+ #####################
+ # USER EXPERIENCE    #
+ #####################
+ # Structured logging helpers for zshrc startup steps.
+ __ux_step=0
+ ux_info() { print -P "%F{33}[zshrc]%f $*" }
+ ux_ok() { print -P "%F{34}[zshrc]%f %F{34}OK%f $*" }
+ ux_warn() { print -P "%F{33}[zshrc]%f %F{214}WARN%f $*" }
+ ux_error() { print -P "%F{33}[zshrc]%f %F{160}ERROR%f $*" }
+ ux_step() {
+   __ux_step=$((__ux_step + 1))
+   ux_info "[$__ux_step] $*"
+ }
+
+check_plugin_health() {
+  local plugin="$1"
+  local check_cmd="$2"
+  
+  # If the dependency binary isn't installed, warn but don't fail.
+  if [[ -n "$check_cmd" ]] && ! command -v "$check_cmd" >/dev/null 2>&1; then
+    ux_warn "$plugin: dependency '$check_cmd' not found (continuing)"
+  fi
+  return 0
+}
+
+#####################
+# MEMORY MANAGEMENT #
+#####################
+# Memory monitoring functions
+check_memory_usage() {
+  # Print resident memory usage for this shell process.
+  if command -v ps >/dev/null; then
+    local shell_mem=$(ps -o rss= -p $$)
+    echo "ZSH Memory Usage: ${shell_mem}KB"
+  fi
+}
+
+# Unload rarely used plugins to free memory
+unload_heavy_plugins() {
+  # List of plugins that can be unloaded to reduce memory footprint.
+  local heavy_plugins=("ranger" "bottom" "dust")
+  for plugin in "${heavy_plugins[@]}"; do
+    if zinit loaded "$plugin" >/dev/null 2>&1; then
+      echo "Unloading $plugin to free memory..."
+      zinit unload "$plugin"
+    fi
+  done
+}
+
+# Lazy load ranger on first use
+lazy_load_ranger() {
+  # Defer loading ranger until first use; skip in headless sessions.
+  if ! has_gui; then
+    ux_warn "ranger: not loading in headless session"
+    return 1
+  fi
+  if ! command -v ranger >/dev/null 2>&1; then
+    echo "Loading ranger..."
+    zinit load ranger/ranger
+  fi
+  command ranger "$@"
+}
+
+# Create ranger alias with lazy loading
+# Ensures the first invocation triggers plugin load.
+alias ranger='lazy_load_ranger'
+
+#####################
+# PLUGIN ORGANIZATION #
+#####################
+# Enhanced plugin health check with fallback
+load_plugin_with_fallback() {
+  local plugin_name="$1"
+  local plugin_repo="$2"
+  local fallback_cmd="$3"
+  local health_check="$4"
+  
+  # Standardized load flow with a health check and optional fallback.
+  ux_step "Loading ${plugin_name}"
+  check_plugin_health "$plugin_name" "$health_check"
+
+  if zinit light "$plugin_repo"; then
+    ux_ok "$plugin_name loaded"
+    return 0
+  fi
+
+  ux_error "$plugin_name failed to load ($plugin_repo)"
+  if [[ -n "$fallback_cmd" ]]; then
+    ux_warn "$plugin_name fallback: $fallback_cmd"
+    eval "$fallback_cmd"
+  fi
+  return 1
+}
+
+#####################
+# ESSENTIAL PLUGINS  #
+#####################
+# These load immediately and are critical for shell functionality
+# SSH-AGENT - Essential for secure connections
+load_plugin_with_fallback "ssh-agent" "bobsoppe/zsh-ssh-agent" "" "ssh-add"
+# AUTOSUGGESTIONS - Essential for productivity
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 zinit ice wait="0a" lucid atload"_zsh_autosuggest_start"
-zinit light zsh-users/zsh-autosuggestions
-# ENHANCD
+load_plugin_with_fallback "zsh-autosuggestions" "zsh-users/zsh-autosuggestions" "" ""
+#####################
+# NAVIGATION PLUGINS #
+#####################
+# These enhance directory and file navigation
+# ENHANCD - Enhanced cd with fuzzy finding
 zinit ice wait="0b" lucid
-zinit light b4b4r07/enhancd
-export ENHANCD_FILTER=fzf:fzy:peco
-# ZOXIDE
+if load_plugin_with_fallback "enhancd" "b4b4r07/enhancd" "alias cd='cd'" ""; then
+  export ENHANCD_FILTER=fzf:fzy:peco
+fi
+
+# ZOXIDE - Smart directory navigation
 zinit ice wait="0" lucid from="gh-r" as="program" pick="zoxide-*/zoxide -> zoxide" cp="zoxide-*/completions/_zoxide -> _zoxide" atclone="./zoxide init zsh > init.zsh" atpull="%atclone" src="init.zsh"
-zinit light ajeetdsouza/zoxide
+load_plugin_with_fallback "zoxide" "ajeetdsouza/zoxide" "alias cd='cd'" "zoxide"
 # HISTORY SUBSTRING SEARCHING
+# Bind arrow keys and vi-mode keys for substring history navigation.
 zinit ice wait="0b" lucid atload'bindkey "$terminfo[kcuu1]" history-substring-search-up; bindkey "$terminfo[kcud1]" history-substring-search-down'
 zinit light zsh-users/zsh-history-substring-search
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
-# TAB COMPLETIONS
+# TAB COMPLETIONS - Essential for usability
 zinit ice wait="0b" lucid blockf
-zinit light zsh-users/zsh-completions
-zstyle ':completion:*' completer _expand _complete _ignored _approximate
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-zstyle ':completion:*' menu select=2
-zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
-zstyle ':completion:*:descriptions' format '-- %d --'
-zstyle ':completion:*:processes' command 'ps -au$USER'
-zstyle ':completion:complete:*:options' sort false
-zstyle ':fzf-tab:complete:_zlua:*' query-string input
-zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm,cmd -w -w"
-zstyle ':fzf-tab:complete:kill:argument-rest' extra-opts --preview=$extract'ps --pid=$in[(w)1] -o cmd --no-headers -w -w' --preview-window=down:3:wrap
-zstyle ":completion:*:git-checkout:*" sort false
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-# FZF
+if load_plugin_with_fallback "zsh-completions" "zsh-users/zsh-completions" "" ""; then
+  # Completion styles
+  zstyle ':completion:*' completer _expand _complete _ignored _approximate
+  zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+  zstyle ':completion:*' menu select=2
+  zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+  zstyle ':completion:*:descriptions' format '-- %d --'
+  zstyle ':completion:*:processes' command 'ps -au$USER'
+  zstyle ':completion:complete:*:options' sort false
+  zstyle ':fzf-tab:complete:_zlua:*' query-string input
+  zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm,cmd -w -w"
+  zstyle ':fzf-tab:complete:kill:argument-rest' extra-opts --preview=$extract'ps --pid=$in[(w)1] -o cmd --no-headers -w -w' --preview-window=down:3:wrap
+  zstyle ":completion:*:git-checkout:*" sort false
+  zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+fi
+#####################
+# SEARCH & FUZZY FINDERS #
+#####################
+# These provide enhanced search capabilities
+# FZF - Essential fuzzy finder
+# Load FZF from GitHub releases for speed.
+ux_step "Loading fzf"
+check_plugin_health "fzf" "fzf"
 zinit ice from"gh-r" as"command"
-zinit light junegunn/fzf
-# FZF BYNARY AND TMUX HELPER SCRIPT
+if zinit light junegunn/fzf; then
+  ux_ok "fzf loaded"
+else
+  ux_error "fzf failed to load"
+fi
+
+ux_step "Loading fzf-tmux"
+# Provide fzf-tmux wrapper if available.
 zinit ice lucid wait'0c' as="command" id-as="junegunn/fzf-tmux" pick="bin/fzf-tmux"
-zinit light junegunn/fzf
-# BIND MULTIPLE WIDGETS USING FZF
-zinit ice lucid wait='0c' multisrc"shell/{completion,key-bindings}.zsh" id-as"junegunn/fzf_completions" pick"/dev/null"
-zinit light junegunn/fzf
-# FZF-TAB
+if zinit light junegunn/fzf; then
+  ux_ok "fzf-tmux loaded"
+else
+  ux_warn "fzf-tmux failed to load"
+fi
+
+ux_step "Loading fzf key-bindings/completions"
+# Adds fzf key bindings and completions for interactive selection.
+zinit ice lucid wait='0c' multisrc"shell/{completion,key-bindings}.zsh" id-as="junegunn/fzf_completions" pick"/dev/null"
+if zinit light junegunn/fzf; then
+  ux_ok "fzf key-bindings/completions loaded"
+else
+  ux_warn "fzf key-bindings/completions failed to load"
+fi
+
+# FZF-TAB - Enhanced tab completions
+ux_step "Loading fzf-tab"
 zinit ice wait="1" lucid
-zinit light Aloxaf/fzf-tab
-# SAD https://github.com/ms-jpq/sad
+if zinit light Aloxaf/fzf-tab; then
+  ux_ok "fzf-tab loaded"
+else
+  ux_warn "fzf-tab failed to load"
+fi
+#####################
+# OPTIONAL PLUGINS   #
+#####################
+# These are nice-to-have but not essential
+# SAD - CLI search and replace (optional)
+# Loads `sad` if present; otherwise no-op.
 zinit ice from="gh-r" as="command"
-zinit light ms-jpq/sad
-# SYNTAX HIGHLIGHTING
+load_plugin_with_fallback "sad" "ms-jpq/sad" "" "sad"
+
+# SYNTAX HIGHLIGHTING - Nice to have
 zinit ice wait="0c" lucid atinit"zpcompinit;zpcdreplay"
-zinit light zdharma-continuum/fast-syntax-highlighting
-# NVM
+load_plugin_with_fallback "fast-syntax-highlighting" "zdharma-continuum/fast-syntax-highlighting" "" ""
+
+# NVM - Node version management (optional)
+# Auto-switch node versions based on .nvmrc when present.
 export NVM_AUTO_USE=true
 zinit ice wait="1" lucid
-zinit light lukechilds/zsh-nvm
-# EZA
-zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza"
-zinit light eza-community/eza
+load_plugin_with_fallback "zsh-nvm" "lukechilds/zsh-nvm" "" "nvm"
+# EZA - Essential file listing tool
+# Faster, prettier ls replacement.
+zinit ice wait="1" lucid from="gh-r" as="program" mv="bin/eza* -> eza"
+load_plugin_with_fallback "eza" "eza-community/eza" "" ""
 zinit ice wait blockf atpull'zinit creinstall -q .'
 # DELTA
+# Git diff pager with syntax highlighting.
 zinit ice lucid wait="0" as="program" from="gh-r" pick="delta*/delta"
-zinit light 'dandavison/delta'
-# DUST
-zinit ice wait="2" lucid from="gh-r" as="program" atload="alias du=dust"
-zinit light bootandy/dust
-# BOTTOM
-zinit ice wait="2" lucid from="gh-r" as="program"
-zinit light ClementTsang/bottom
+load_plugin_with_fallback "delta" "dandavison/delta" "" ""
+# DUST - Disk usage analyzer (non-critical)
+zinit ice wait="3" lucid from="gh-r" as="program" atload="alias du=dust"
+load_plugin_with_fallback "dust" "bootandy/dust" "" ""
+# BOTTOM - System monitor (non-critical)
+zinit ice wait="3" lucid from="gh-r" as="program"
+load_plugin_with_fallback "bottom" "ClementTsang/bottom" "" ""
 # DUF
 zinit ice lucid wait="0" as="program" from="gh-r" atload="alias df=duf"
-zinit light muesli/duf
+load_plugin_with_fallback "duf" "muesli/duf" "" ""
 # BAT
+# cat replacement with syntax highlighting.
 zinit ice from"gh-r" as"program" mv"bat* -> bat" pick"bat/bat" atload"alias cat=bat"
-zinit light sharkdp/bat
-# BAT-EXTRAS
-zinit ice lucid wait="1" as="program" pick="src/batgrep.sh"
-zinit ice lucid wait="1" as="program" pick="src/batdiff.sh"
-zinit light eth-p/bat-extras
-alias rg=batgrep.sh
-alias bd=batdiff.sh
-alias man=batman.sh
+load_plugin_with_fallback "bat" "sharkdp/bat" "" ""
+# BAT-EXTRAS - Heavy plugins with unload capability
+zinit ice lucid wait="2" as="program" pick="src/batgrep.sh" unload
+zinit ice lucid wait="2" as="program" pick="src/batdiff.sh" unload
+if load_plugin_with_fallback "bat-extras" "eth-p/bat-extras" "" ""; then
+  alias rg=batgrep.sh
+  alias bd=batdiff.sh
+  alias man=batman.sh
+fi
 # RIPGREP
+# Fast recursive search tool.
 zinit ice from"gh-r" as"program" mv"ripgrep* -> ripgrep" pick"ripgrep/rg"
-zinit light BurntSushi/ripgrep
-# NEOVIM
-# zinit ice from"gh-r" as"program" bpick"*appimage*" ver"nightly" mv"nvim* -> nvim" pick"nvim"
-# zinit light neovim/neovim
-# WEZTERM
-# zinit ice from="gh-r" as="program" bpick="*ebian11.deb" ver="nightly" pick="usr/bin/wezterm"
-# zinit ice from="gh-r" as="program" bpick="*appimage*" mv="Wez* -> wezterm" pick="wezterm"
-# zinit light wez/wezterm
+load_plugin_with_fallback "ripgrep" "BurntSushi/ripgrep" "" ""
 # FORGIT
+ux_step "Loading forgit"
 zinit ice wait lucid
-zinit load 'wfxr/forgit'
+if zinit load 'wfxr/forgit'; then
+  ux_ok "forgit loaded"
+else
+  ux_warn "forgit failed to load"
+fi
 # LAZYGIT
+# Git TUI with `lg` alias.
 zinit ice lucid wait="0" as="program" from="gh-r" mv="lazygit* -> lazygit" atload="alias lg='lazygit'"
-zinit light jesseduffield/lazygit
-# LAZYDOCKER
-zinit ice lucid wait="0" as="program" from="gh-r" mv="lazydocker* -> lazydocker" atload="alias ld='lazydocker'"
-zinit light jesseduffield/lazydocker
-# RANGER
-zinit ice depth="1" as="program" pick="ranger.py"
-zinit light ranger/ranger
+load_plugin_with_fallback "lazygit" "jesseduffield/lazygit" "" ""
+# LAZYDOCKER - Docker TUI (conditional on Docker)
+if has_docker; then
+  # Only load if Docker CLI is present.
+  zinit ice lucid wait="2" as="program" from="gh-r" mv="lazydocker* -> lazydocker" atload="alias ld='lazydocker'"
+  load_plugin_with_fallback "lazydocker" "jesseduffield/lazydocker" "" ""
+else
+  ux_info "Skipping lazydocker (docker not found)"
+fi
+# RANGER - File manager (lazy-loaded via alias ranger='lazy_load_ranger')
 # FD
+# Fast find alternative.
 zinit ice as="command" from="gh-r" mv="fd* -> fd" pick="fd/fd"
-zinit light sharkdp/fd
+load_plugin_with_fallback "fd" "sharkdp/fd" "" ""
 # GH-CLI
+# GitHub CLI.
 zinit ice lucid wait="0" as="program" from="gh-r" pick="gh*/bin/gh"
-zinit light cli/cli
+load_plugin_with_fallback "gh" "cli/cli" "" ""
 # GOOGLE-CLOUD-SDK COMPLETION
 # zinit ice as="completion"; zinit snippet /opt/google-cloud-sdk/completion.zsh.inc
 # TMUX
@@ -171,32 +332,44 @@ zinit light cli/cli
 # TMUXINATOR
 # zinit ice as="completion"; zinit snippet ~/.tmuxinator.zsh
 # ZSH MANYDOTS MAGIC
+# Expand multiple dots in paths (e.g., `..` => `../`).
 zinit ice depth"1" wait lucid pick"manydots-magic" compile"manydots-magic"
-zinit light knu/zsh-manydots-magic
+load_plugin_with_fallback "manydots-magic" "knu/zsh-manydots-magic" "" ""
 # TREE-SITTER
 # zinit ice as="program" from="gh-r" mv="tree* -> tree-sitter" pick="tree-sitter"
 # zinit light tree-sitter/tree-sitter
 # XURLS
+# Extract URLs from input.
 zinit ice as="program" from="gh-r" mv="xurls* -> xurls" pick="xurls"
-zinit light mvdan/xurls
+load_plugin_with_fallback "xurls" "mvdan/xurls" "" ""
 # PRETTYPING
+# Pretty `ping` output.
+ux_step "Loading prettyping"
 zinit ice lucid wait="" as="program" pick="prettyping" atload="alias ping=prettyping"
-zinit load denilsonsa/prettyping
-# CROC
-zinit ice lucid wait="0" as="program" from="gh-r" bpick="*64bit*"
-zinit light schollz/croc
+if zinit load denilsonsa/prettyping; then
+  ux_ok "prettyping loaded"
+else
+  ux_warn "prettyping failed to load"
+fi
+# CROC - File transfer (non-critical, unloadable)
+# Secure file transfer tool; unloadable.
+zinit ice lucid wait="3" as="program" from="gh-r" bpick="*64bit*" unload
+load_plugin_with_fallback "croc" "schollz/croc" "" ""
 # GLOW
 # zinit ice lucid wait"0" as"program" from"gh-r" bpick='*_amd64.deb' pick"usr/bin/glow"
 # zinit light charmbracelet/glow
-# ERDTREE
-zinit ice lucid wait"0" as"program" from"gh-r"
-zinit light solidiquis/erdtree
+# ERDTREE - Tree alternative (non-critical, unloadable)
+# Optional tree viewer; unloadable.
+zinit ice lucid wait="3" as="program" from="gh-r" unload
+load_plugin_with_fallback "erdtree" "solidiquis/erdtree" "" ""
 # ZSH DIFF SO FANCY
+# Pretty diffs in terminal.
 zinit ice wait="2" lucid as"program" pick"bin/git-dsf"
-zinit light zdharma-continuum/zsh-diff-so-fancy
+load_plugin_with_fallback "zsh-diff-so-fancy" "zdharma-continuum/zsh-diff-so-fancy" "" ""
 #####################
 # HISTORY           #
 #####################
+# History file and size limits.
 [ -z "$HISTFILE" ] && HISTFILE="$HOME/.zhistory"
 HISTSIZE=290000
 SAVEHIST=$HISTSIZE
@@ -204,6 +377,7 @@ SAVEHIST=$HISTSIZE
 #####################
 # SETOPT            #
 #####################
+# Shell behavior toggles for history, completion, and editing.
 setopt extended_history       # record timestamp of command in HISTFILE
 setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
 setopt hist_ignore_all_dups   # ignore duplicated commands history list
@@ -227,19 +401,21 @@ setopt vi
 # chpwd() eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale all,age,size
 
 chpwd() {
+  # On directory change, auto-fetch if entering a new git repo.
   set -- "$(git rev-parse --show-toplevel 2> /dev/null)"
   # If cd'ing into a git working copy and not within the same working copy
   if [ -n "$1" ] && [ "$1" != "$vc_root" ]; then
     vc_root="$1"
     git fetch
   fi
-  # ls inside folder after cd
+  # List contents after changing directories.
   eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
 }
 
 #####################
 # ENV VARIABLE      #
 #####################
+# Editor and locale defaults.
 export EDITOR='nvim'
 export VISUAL=$EDITOR
 export PAGER='less'
@@ -254,10 +430,12 @@ export LC_ALL='en_US.UTF-8'
 #####################
 # COLORING          #
 #####################
+# Enable Zsh color names (e.g., $fg[red]).
 autoload colors && colors
 #####################
 # ALIASES           #
 #####################
+# Common listings and utilities.
 # source $HOME/.zsh_aliases
 # alias ll='ls -hlqAF'
 alias ll='eza -lha --git --icons --color=always --group-directories-first -S --reverse | bat'
@@ -278,10 +456,12 @@ alias rm="rm -v"
 # FANCY-CTRL-Z      #
 #####################
 function fg-fzf() {
+	# Pick a suspended job via fzf, then foreground it.
 	job="$(jobs | fzf -0 -1 | sed -E 's/\[(.+)\].*/\1/')" && echo '' && fg %$job
 }
 
 function fancy-ctrl-z () {
+	# If buffer is empty, show job picker; otherwise push input and clear.
 	if [[ $#BUFFER -eq 0 ]]; then
 		BUFFER=" fg-fzf"
 		zle accept-line -w
@@ -296,6 +476,7 @@ bindkey '^Z' fancy-ctrl-z
 #####################
 # FZF SETTINGS      #
 #####################
+# Default fzf UI options and preview behavior.
 # Added for Catppuccin theme and commented the rest
 # --color=fg:#c0caf5,bg:#24283b,hl:#ff9e64
 # --color=fg+:#c0caf5,bg+:#24283b,hl+:#ff9e64
@@ -320,6 +501,7 @@ export FZF_DEFAULT_OPTS="
 --bind 'ctrl-e:execute(nvim {} < /dev/tty > /dev/tty 2>&1)' > selected
 --bind 'ctrl-v:execute(code {+})'"
 
+# File list used by fzf and Ctrl-T widgets.
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow -g "!{.git,node_modules}/*" 2> /dev/null'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS='--preview="cat {}" --preview-window=right:60%:wrap'
@@ -331,6 +513,7 @@ export FZF_ALT_C_OPTS='--preview="ls {}" --preview-window=right:60%:wrap'
 # Thanks to sei40kr/zsh-fzf-gcloud
 
 function fzf-gcloud-config-set-project() {
+    # Select a GCP project via fzf and set it in gcloud config.
     local project="$(gcloud projects list |
         fzf --header-lines=1 --reverse |
         awk '{ print $1 }')"
@@ -342,20 +525,9 @@ function fzf-gcloud-config-set-project() {
 zle -N fzf-gcloud-config-set-project
 bindkey '^G' fzf-gcloud-config-set-project
 
-#####################
-# P10K SETTINGS     #
-#####################
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 
 # MINE #
+# Custom key bindings.
 bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
 bindkey '^P' history-substring-search-up
@@ -367,58 +539,14 @@ bindkey '^N' vi-forward-word
 bindkey '^O' delete-word
 bindkey '^Y' yank
 
-
 # Do not set the TERM variable in she shell! Set it to iTerm2 manually.
 # If you do set it in the shell the Tmux will read this and mess up the colors!
 # Tmux needs to change this to screen-256color or tmux-256color !
 # export TERM=xterm-256color
 
-#To link Rubies to Homebrew's OpenSSL 1.1 (which is upgraded) add the following to your ~/.zshrc:
-# export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-
-# Load pyenv automatically by appending
-# eval "$(pyenv init -)"
-
-# Load pyenv-virtualenv automatically
-# if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
-
 # For Zathura installation: Dbus
 export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_LAUNCHD_SESSION_BUS_SOCKET"
 
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/homebrew/Caskroom/mambaforge/base/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/conda.sh" ]; then
-        . "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/homebrew/Caskroom/mambaforge/base/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-if [ -f "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/mamba.sh" ]; then
-    . "/opt/homebrew/Caskroom/mambaforge/base/etc/profile.d/mamba.sh"
-fi
-# <<< conda initialize <<<
-
-
 # Added for broot
+# Broot launcher integration.
 source $HOME/.config/broot/launcher/bash/br
-
-function conda_activate() {
-    local original_path="$PATH"
-    export PATH=$(echo "$PATH" | sed 's|:$HOME/.asdf/shims||' | sed 's|$HOME/.asdf/shims:||')
-    export PATH="/opt/homebrew/Caskroom/mambaforge/base/bin:$PATH"
-    conda activate "$1"
-    if [ $? -ne 0 ]; then
-        echo "Failed to activate conda environment. Restoring original PATH."
-        export PATH="$original_path"
-    fi
-}
-
-# Added for asdf
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
