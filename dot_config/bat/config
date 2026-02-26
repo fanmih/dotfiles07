@@ -5,8 +5,10 @@
 # Specify desired highlighting theme (e.g. "TwoDark"). Run `bat --list-themes`
 # for a list of all available themes
 #--theme="TwoDark"
-# --theme="Monokai Extended Bright"
---theme="Catppuccin Mocha"
+# --theme-light="Monokai Extended Bright"
+--theme-light="Catppuccin Latte"
+--theme-dark="Catppuccin Mocha"
+--theme="auto"
 
 # Enable this to use italic text on the terminal. This is not supported on all
 # terminal emulators (like tmux, by default):
