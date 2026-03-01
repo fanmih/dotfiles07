@@ -1,7 +1,7 @@
 [user]
 	email = fanmih@gmail.com
 	name = Michael Fanariotis
-	signingkey = CA62A30F18B6FC8009020E43B0B1C15BFBE06901
+	signingkey = 16CAE8BA663D204AD3A72334C318171105FC7E2D
 [core]
   editor = nvim
   pager = delta
