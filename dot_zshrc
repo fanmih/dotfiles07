@@ -351,10 +351,6 @@ if zinit load denilsonsa/prettyping; then
 else
   ux_warn "prettyping failed to load"
 fi
-# CROC - File transfer (non-critical, unloadable)
-# Secure file transfer tool; unloadable.
-zinit ice lucid wait="3" as="program" from="gh-r" bpick="*64bit*" unload
-load_plugin_with_fallback "croc" "schollz/croc" "" ""
 # GLOW
 # zinit ice lucid wait"0" as"program" from"gh-r" bpick='*_amd64.deb' pick"usr/bin/glow"
 # zinit light charmbracelet/glow
